@@ -1,24 +1,50 @@
 using UnityEngine;
+using System;
 
-[System.Serializable] 
+[System.Serializable]
 public class Chest
 {
-    public ChestType chestType; 
-    public ChestState state;    
+    public ChestType chestType;
+    private IChestState currentState;
     public float remainingTime;
-    public int slotIndex;       
+    public int slotIndex;
+
+    
+    public event Action OnStateChanged;
 
     public Chest(ChestType type, int slot)
     {
         chestType = type;
-        state = ChestState.Locked;
-        remainingTime = type.timerInMinutes * 60f; 
         slotIndex = slot;
+        SetState(new LockedState());
     }
+
+    public void SetState(IChestState newState)
+    {
+        currentState = newState;
+        currentState.EnterState(this);
+        OnStateChanged?.Invoke(); 
+    }
+
+    public void Update()
+    {
+        currentState.UpdateState(this);
+    }
+
+    public void StartTimer()
+    {
+        currentState.OnStartTimer(this);
+    }
+
+    public void UnlockWithGems()
+    {
+        currentState.OnUnlockWithGems(this);
+    }
+
     public (int coins, int gems) GetRewards()
     {
-        int coins = Random.Range(chestType.minCoins, chestType.maxCoins + 1);
-        int gems = Random.Range(chestType.minGems, chestType.maxGems + 1);
+        int coins = UnityEngine.Random.Range(chestType.minCoins, chestType.maxCoins + 1);
+        int gems = UnityEngine.Random.Range(chestType.minGems, chestType.maxGems + 1);
         return (coins, gems);
     }
 }
