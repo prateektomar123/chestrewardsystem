@@ -8,12 +8,16 @@ public class ChestSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private Button startTimerButton;
     [SerializeField] private Button unlockWithGemsButton;
+    [SerializeField] private Button collectButton;
     private Chest chest;
+    private ChestController chestController;
 
     void Awake()
     {
-        startTimerButton.onClick.AddListener(OnStartTimerButton);
+        chestController = FindObjectOfType<ChestController>();
+        //startTimerButton.onClick.AddListener(OnStartTimerButton);
         unlockWithGemsButton.onClick.AddListener(OnUnlockWithGemsButton);
+        collectButton.onClick.AddListener(OnCollectButton);
         Clear();
     }
 
@@ -42,15 +46,20 @@ public class ChestSlotUI : MonoBehaviour
         timerText.text = "Empty";
         startTimerButton.gameObject.SetActive(false);
         unlockWithGemsButton.gameObject.SetActive(false);
+        collectButton.gameObject.SetActive(false);
     }
 
     private void UpdateUI()
     {
         if (chest == null) return;
 
-        timerText.text = chest.remainingTime > 0 ? FormatTime(chest.remainingTime) : "Collect";
-        startTimerButton.gameObject.SetActive(chest.remainingTime == chest.chestType.timerInMinutes * 60f);
-        unlockWithGemsButton.gameObject.SetActive(chest.remainingTime > 0);
+        bool isLocked = chest.remainingTime == chest.chestType.timerInMinutes * 60f;
+        bool isCollected = chest.remainingTime <= 0;
+
+        timerText.text = isCollected ? "Collect" : FormatTime(chest.remainingTime);
+        startTimerButton.gameObject.SetActive(isLocked);
+        unlockWithGemsButton.gameObject.SetActive(!isLocked && !isCollected);
+        collectButton.gameObject.SetActive(isCollected);
     }
 
     private string FormatTime(float seconds)
@@ -62,13 +71,19 @@ public class ChestSlotUI : MonoBehaviour
     }
 
     public void OnStartTimerButton()
+{
+    if (chest != null)
     {
-        if (chest != null)
-        {
-            ICommand command = new StartTimerCommand(chest);
-            command.Execute();
-        }
+        Debug.Log($"StartTimerButton clicked for chest in slot {chest.slotIndex}");
+        ICommand command = new StartTimerCommand(chest);
+        command.Execute();
+        chestController.StartTimer(chest.slotIndex);
     }
+    else
+    {
+        Debug.LogError("StartTimerButton clicked, but chest is null!");
+    }
+}
 
     public void OnUnlockWithGemsButton()
     {
@@ -76,6 +91,14 @@ public class ChestSlotUI : MonoBehaviour
         {
             ICommand command = new UnlockWithGemsCommand(chest);
             command.Execute();
+        }
+    }
+
+    public void OnCollectButton()
+    {
+        if (chest != null)
+        {
+            chestController.CollectRewards(chest.slotIndex);
         }
     }
 }

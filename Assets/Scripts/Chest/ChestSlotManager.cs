@@ -8,8 +8,9 @@ public class ChestSlotManager : MonoBehaviour
     [SerializeField] private ChestType[] chestTypes;
     [SerializeField] private int maxSlots = 4;
     [SerializeField] private Popup slotsFullPopup;
-    [SerializeField] private ChestSlotUI[] chestSlotUIs; 
+    [SerializeField] private ChestSlotUI[] chestSlotUIs;
     private List<Chest> chestSlots;
+    private Queue<Chest> chestQueue; 
 
     void Awake()
     {
@@ -25,9 +26,11 @@ public class ChestSlotManager : MonoBehaviour
         }
 
         chestSlots = new List<Chest>(new Chest[maxSlots]);
+        chestQueue = new Queue<Chest>();
+
         if (chestSlotUIs.Length != maxSlots)
         {
-            Debug.LogError($"ChestSlotManager: Expected {maxSlots} ChestSlotUIs, but found {chestSlotUIs.Length}. Please assign the correct number of slots in the Inspector.");
+            Debug.LogError($"ChestSlotManager: Expected {maxSlots} ChestSlotUIs, but found {chestSlotUIs.Length}.");
         }
     }
 
@@ -74,7 +77,14 @@ public class ChestSlotManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"Invalid slot index {slotIndex} for chestSlotUIs. Ensure all slots are assigned in the Inspector.");
+            Debug.LogError($"Invalid slot index {slotIndex} for chestSlotUIs.");
+        }
+
+        
+        if (!TimerManager.Instance.CanStartTimer())
+        {
+            chestQueue.Enqueue(newChest);
+            Debug.Log($"Chest added to queue. Queue size: {chestQueue.Count}");
         }
 
         return true;
@@ -86,6 +96,14 @@ public class ChestSlotManager : MonoBehaviour
         if (slotIndex >= 0 && slotIndex < chestSlotUIs.Length)
         {
             chestSlotUIs[slotIndex].Clear();
+        }
+
+        
+        if (chestQueue.Count > 0 && TimerManager.Instance.CanStartTimer())
+        {
+            Chest nextChest = chestQueue.Dequeue();
+            nextChest.StartTimer();
+            Debug.Log($"Started timer for next chest in queue. Queue size: {chestQueue.Count}");
         }
     }
 
