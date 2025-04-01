@@ -8,8 +8,8 @@ public class ChestSlotManager : MonoBehaviour
     [SerializeField] private ChestType[] chestTypes;
     [SerializeField] private int maxSlots = 4;
     [SerializeField] private Popup slotsFullPopup;
+    [SerializeField] private ChestSlotUI[] chestSlotUIs; 
     private List<Chest> chestSlots;
-    private List<ChestSlotUI> chestSlotUIs;
 
     void Awake()
     {
@@ -25,12 +25,10 @@ public class ChestSlotManager : MonoBehaviour
         }
 
         chestSlots = new List<Chest>(new Chest[maxSlots]);
-        chestSlotUIs = new List<ChestSlotUI>();
-    }
-
-    public void RegisterSlotUI(ChestSlotUI slotUI)
-    {
-        chestSlotUIs.Add(slotUI);
+        if (chestSlotUIs.Length != maxSlots)
+        {
+            Debug.LogError($"ChestSlotManager: Expected {maxSlots} ChestSlotUIs, but found {chestSlotUIs.Length}. Please assign the correct number of slots in the Inspector.");
+        }
     }
 
     public bool HasEmptySlot()
@@ -48,7 +46,20 @@ public class ChestSlotManager : MonoBehaviour
         if (!HasEmptySlot())
         {
             Debug.Log("All slots are full!");
-            slotsFullPopup.Show();
+            if (slotsFullPopup != null)
+            {
+                slotsFullPopup.Show();
+            }
+            else
+            {
+                Debug.LogError("SlotsFullPopup is not assigned in ChestSlotManager!");
+            }
+            return false;
+        }
+
+        if (chestTypes == null || chestTypes.Length == 0)
+        {
+            Debug.LogError("ChestTypes array is empty in ChestSlotManager!");
             return false;
         }
 
@@ -56,14 +67,26 @@ public class ChestSlotManager : MonoBehaviour
         int slotIndex = GetFirstEmptySlotIndex();
         Chest newChest = new Chest(randomChestType, slotIndex);
         chestSlots[slotIndex] = newChest;
-        chestSlotUIs[slotIndex].SetChest(newChest);
+
+        if (slotIndex >= 0 && slotIndex < chestSlotUIs.Length)
+        {
+            chestSlotUIs[slotIndex].SetChest(newChest);
+        }
+        else
+        {
+            Debug.LogError($"Invalid slot index {slotIndex} for chestSlotUIs. Ensure all slots are assigned in the Inspector.");
+        }
+
         return true;
     }
 
     public void RemoveChest(int slotIndex)
     {
         chestSlots[slotIndex] = null;
-        chestSlotUIs[slotIndex].Clear();
+        if (slotIndex >= 0 && slotIndex < chestSlotUIs.Length)
+        {
+            chestSlotUIs[slotIndex].Clear();
+        }
     }
 
     public Chest GetChest(int slotIndex)

@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class ChestController : MonoBehaviour
 {
-    private ChestSlotManager chestSlotManager;
-
-    void Awake()
-    {
-        chestSlotManager = ChestSlotManager.Instance;
-    }
+    [SerializeField] private ChestSlotManager chestSlotManager;
 
     public void GenerateChest()
     {
+        if (chestSlotManager == null)
+        {
+            Debug.LogError("ChestSlotManager is not assigned in the Inspector!");
+            return;
+        }
         chestSlotManager.AddChest();
     }
 }

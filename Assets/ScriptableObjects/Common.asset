@@ -18,4 +18,4 @@ MonoBehaviour:
   maxCoins: 200
   minGems: 10
   maxGems: 20
-  chestSprite: {fileID: 0}
+  chestSprite: {fileID: -4931269165690892505, guid: da3a9625bcf8b4658b803d07d0cf56ca, type: 3}
