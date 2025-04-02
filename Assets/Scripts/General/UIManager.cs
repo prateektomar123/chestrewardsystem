@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -23,6 +23,10 @@ public class UIManager : MonoBehaviour
         }
 
         
+        
+    }
+    void Start()
+    {
         if (PlayerData.Instance != null)
         {
             PlayerData.Instance.OnPlayerDataChanged += UpdateUI;
@@ -33,7 +37,6 @@ public class UIManager : MonoBehaviour
             Debug.LogError("PlayerData instance is null in UIManager!");
         }
     }
-
     void OnDestroy()
     {
         
