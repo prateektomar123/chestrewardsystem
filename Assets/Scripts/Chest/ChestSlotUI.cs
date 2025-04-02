@@ -62,16 +62,21 @@ public class ChestSlotUI : MonoBehaviour
         bool isLocked = chest.remainingTime == chest.chestType.timerInMinutes * 60f;
         bool isCollected = chest.remainingTime <= 0;
 
+        //Debug.Log($"UpdateUI: remainingTime = {chest.remainingTime}, isCollected = {isCollected}, isLocked = {isLocked}");
+
         timerText.text = isCollected ? "Collect" : FormatTime(chest.remainingTime);
         startTimerButton.gameObject.SetActive(isLocked);
         unlockWithGemsButton.gameObject.SetActive(!isLocked && !isCollected);
         collectButton.gameObject.SetActive(isCollected);
-        undoButton.gameObject.SetActive(canUndo);
 
-        if (!isLocked && !isCollected)
+        if (undoButton != null)
         {
-            int gemCost = chest.CalculateGemCost();
-            unlockWithGemsButtonText.text = $"Unlock ({gemCost} Gems)";
+            undoButton.gameObject.SetActive(canUndo);
+            //Debug.Log($"UpdateUI: canUndo = {canUndo}, undoButton active = {undoButton.gameObject.activeSelf}");
+        }
+        else
+        {
+            //Debug.LogError("UndoButton is not assigned in ChestSlotUI!");
         }
     }
 
@@ -97,10 +102,12 @@ public class ChestSlotUI : MonoBehaviour
     {
         if (chest != null)
         {
+            canUndo = true; 
+            Debug.Log($"OnUnlockWithGemsButton: canUndo set to {canUndo}");
             ICommand command = new UnlockWithGemsCommand(chest);
             CommandManager.Instance.ExecuteCommand(command);
-            chestController.UnlockWithGems(chest.slotIndex);
-            canUndo = true; 
+            //chestController.UnlockWithGems(chest.slotIndex);
+            UpdateUI();
         }
     }
 
@@ -117,5 +124,6 @@ public class ChestSlotUI : MonoBehaviour
     {
         CommandManager.Instance.Undo();
         canUndo = false; 
+        UpdateUI(); 
     }
 }

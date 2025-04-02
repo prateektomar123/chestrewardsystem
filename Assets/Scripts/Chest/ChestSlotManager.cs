@@ -6,11 +6,12 @@ public class ChestSlotManager : MonoBehaviour
     public static ChestSlotManager Instance { get; private set; }
 
     [SerializeField] private ChestType[] chestTypes;
-    [SerializeField] private int maxSlots = 4;
-    [SerializeField] private Popup slotsFullPopup;
     [SerializeField] private ChestSlotUI[] chestSlotUIs;
-    private List<Chest> chestSlots;
-    private Queue<Chest> chestQueue; 
+    [SerializeField] private Popup slotsFullPopup; 
+    public Popup timerActivePopup; 
+
+    private Chest[] chestSlots;
+    private Queue<Chest> chestQueue = new Queue<Chest>();
 
     void Awake()
     {
@@ -25,23 +26,7 @@ public class ChestSlotManager : MonoBehaviour
             return;
         }
 
-        chestSlots = new List<Chest>(new Chest[maxSlots]);
-        chestQueue = new Queue<Chest>();
-
-        if (chestSlotUIs.Length != maxSlots)
-        {
-            Debug.LogError($"ChestSlotManager: Expected {maxSlots} ChestSlotUIs, but found {chestSlotUIs.Length}.");
-        }
-    }
-
-    public bool HasEmptySlot()
-    {
-        return chestSlots.Contains(null);
-    }
-
-    private int GetFirstEmptySlotIndex()
-    {
-        return chestSlots.IndexOf(null);
+        chestSlots = new Chest[chestSlotUIs.Length];
     }
 
     public bool AddChest()
@@ -51,7 +36,7 @@ public class ChestSlotManager : MonoBehaviour
             Debug.Log("All slots are full!");
             if (slotsFullPopup != null)
             {
-                slotsFullPopup.Show();
+                slotsFullPopup.Show("All slots are full!");
             }
             else
             {
@@ -85,9 +70,50 @@ public class ChestSlotManager : MonoBehaviour
         {
             chestQueue.Enqueue(newChest);
             Debug.Log($"Chest added to queue. Queue size: {chestQueue.Count}");
+            if (timerActivePopup != null)
+            {
+                timerActivePopup.Show("Another chest is already unlocking! This chest has been added to the queue.");
+            }
+            else
+            {
+                Debug.LogError("TimerActivePopup is not assigned in ChestSlotManager!");
+            }
         }
 
         return true;
+    }
+
+    public bool HasEmptySlot()
+    {
+        for (int i = 0; i < chestSlots.Length; i++)
+        {
+            if (chestSlots[i] == null)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int GetFirstEmptySlotIndex()
+    {
+        for (int i = 0; i < chestSlots.Length; i++)
+        {
+            if (chestSlots[i] == null)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public Chest GetChest(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < chestSlots.Length)
+        {
+            return chestSlots[slotIndex];
+        }
+        return null;
     }
 
     public void RemoveChest(int slotIndex)
@@ -98,17 +124,11 @@ public class ChestSlotManager : MonoBehaviour
             chestSlotUIs[slotIndex].Clear();
         }
 
-        
         if (chestQueue.Count > 0 && TimerManager.Instance.CanStartTimer())
         {
             Chest nextChest = chestQueue.Dequeue();
             nextChest.StartTimer();
             Debug.Log($"Started timer for next chest in queue. Queue size: {chestQueue.Count}");
         }
-    }
-
-    public Chest GetChest(int slotIndex)
-    {
-        return chestSlots[slotIndex];
     }
 }

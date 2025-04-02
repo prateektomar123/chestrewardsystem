@@ -1,40 +1,49 @@
 using UnityEngine;
+using System;
 
-[System.Serializable]
-public class PlayerData
+public class PlayerData : MonoBehaviour
 {
-    private static PlayerData instance;
-    public static PlayerData Instance
+    public static PlayerData Instance { get; private set; }
+
+    private int coins;
+    private int gems;
+
+    
+    public event Action OnPlayerDataChanged;
+
+    void Awake()
     {
-        get
+        if (Instance == null)
         {
-            if (instance == null)
-            {
-                instance = new PlayerData();
-            }
-            return instance;
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            Initialize();
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
-    public int coins;
-    public int gems;
-
-    private PlayerData()
+    private void Initialize()
     {
-        coins = 0;
-        gems = 100; 
+        coins = 50;
+        gems = 10; 
+        NotifyDataChanged();
     }
 
     public void AddCoins(int amount)
     {
         coins += amount;
         Debug.Log($"Added {amount} coins. Total: {coins}");
+        NotifyDataChanged();
     }
 
     public void AddGems(int amount)
     {
         gems += amount;
         Debug.Log($"Added {amount} gems. Total: {gems}");
+        NotifyDataChanged();
     }
 
     public bool SpendGems(int amount)
@@ -43,9 +52,24 @@ public class PlayerData
         {
             gems -= amount;
             Debug.Log($"Spent {amount} gems. Remaining: {gems}");
+            NotifyDataChanged();
             return true;
         }
-        Debug.Log("Not enough gems!");
         return false;
+    }
+
+    public int GetCoins()
+    {
+        return coins;
+    }
+
+    public int GetGems()
+    {
+        return gems;
+    }
+
+    private void NotifyDataChanged()
+    {
+        OnPlayerDataChanged?.Invoke();
     }
 }

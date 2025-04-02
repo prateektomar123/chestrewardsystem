@@ -49,7 +49,7 @@ public class TimerManager : MonoBehaviour
 {
     if (activeChest != null)
     {
-        Debug.Log($"TimerManager: Updating activeChest in slot {activeChest.slotIndex}");
+//        Debug.Log($"TimerManager: Updating activeChest in slot {activeChest.slotIndex}");
         activeChest.Update();
     }
 }

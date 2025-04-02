@@ -11,7 +11,7 @@ public class UnlockingState : IChestState
     {
         if (chest.remainingTime > 0)
         {
-            Debug.Log($"UnlockingState: Updating timer for chest in slot {chest.slotIndex}. Remaining time: {chest.remainingTime}");
+            //Debug.Log($"UnlockingState: Updating timer for chest in slot {chest.slotIndex}. Remaining time: {chest.remainingTime}");
             chest.remainingTime -= Time.deltaTime;
             if (chest.remainingTime <= 0)
             {
