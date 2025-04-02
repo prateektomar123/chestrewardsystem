@@ -63,4 +63,31 @@ public class ChestController : MonoBehaviour
             chestSlotManager.RemoveChest(slotIndex);
         }
     }
+
+    public void UnlockWithGems(int slotIndex)
+    {
+        if (chestSlotManager == null)
+        {
+            chestSlotManager = ChestSlotManager.Instance;
+            if (chestSlotManager == null)
+            {
+                Debug.LogError("ChestSlotManager instance is null!");
+                return;
+            }
+        }
+
+        Chest chest = chestSlotManager.GetChest(slotIndex);
+        if (chest != null)
+        {
+            int gemCost = chest.CalculateGemCost();
+            if (PlayerData.Instance.SpendGems(gemCost))
+            {
+                chest.UnlockWithGems();
+            }
+            else
+            {
+                Debug.Log("Not enough gems to unlock the chest!");
+            }
+        }
+    }
 }

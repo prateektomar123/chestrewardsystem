@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class StartTimerCommand : ICommand
 {
     private Chest chest;
@@ -9,6 +11,7 @@ public class StartTimerCommand : ICommand
 
     public void Execute()
     {
+        Debug.Log($"Executing StartTimerCommand for chest in slot {chest.slotIndex}");
         chest.StartTimer();
     }
 

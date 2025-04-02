@@ -16,6 +16,8 @@ public class LockedState : IChestState
     {
         if (TimerManager.Instance.CanStartTimer())
         {
+            Debug.Log($"LockedState: Transitioning to UnlockingState for chest in slot {chest.slotIndex}");
+            TimerManager.Instance.StartTimer(chest);
             chest.SetState(new UnlockingState());
         }
         else
@@ -27,5 +29,7 @@ public class LockedState : IChestState
     public void OnUnlockWithGems(Chest chest)
     {
         
+        chest.remainingTime = 0;
+        chest.SetState(new CollectedState());
     }
 }

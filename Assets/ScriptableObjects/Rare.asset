@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare
   m_EditorClassIdentifier: 
   chestName: Rare
-  timerInMinutes: 30
+  timerInMinutes: 1
   minCoins: 300
   maxCoins: 500
   minGems: 20

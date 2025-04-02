@@ -1,6 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class ChestSlotUI : MonoBehaviour
 {
@@ -8,16 +8,20 @@ public class ChestSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private Button startTimerButton;
     [SerializeField] private Button unlockWithGemsButton;
+    [SerializeField] private TextMeshProUGUI unlockWithGemsButtonText;
     [SerializeField] private Button collectButton;
+    [SerializeField] private Button undoButton; 
     private Chest chest;
     private ChestController chestController;
+    private bool canUndo; 
 
     void Awake()
     {
         chestController = FindObjectOfType<ChestController>();
-        //startTimerButton.onClick.AddListener(OnStartTimerButton);
+        startTimerButton.onClick.AddListener(OnStartTimerButton);
         unlockWithGemsButton.onClick.AddListener(OnUnlockWithGemsButton);
         collectButton.onClick.AddListener(OnCollectButton);
+        undoButton.onClick.AddListener(OnUndoButton);
         Clear();
     }
 
@@ -47,6 +51,8 @@ public class ChestSlotUI : MonoBehaviour
         startTimerButton.gameObject.SetActive(false);
         unlockWithGemsButton.gameObject.SetActive(false);
         collectButton.gameObject.SetActive(false);
+        undoButton.gameObject.SetActive(false);
+        canUndo = false;
     }
 
     private void UpdateUI()
@@ -60,6 +66,13 @@ public class ChestSlotUI : MonoBehaviour
         startTimerButton.gameObject.SetActive(isLocked);
         unlockWithGemsButton.gameObject.SetActive(!isLocked && !isCollected);
         collectButton.gameObject.SetActive(isCollected);
+        undoButton.gameObject.SetActive(canUndo);
+
+        if (!isLocked && !isCollected)
+        {
+            int gemCost = chest.CalculateGemCost();
+            unlockWithGemsButtonText.text = $"Unlock ({gemCost} Gems)";
+        }
     }
 
     private string FormatTime(float seconds)
@@ -71,26 +84,23 @@ public class ChestSlotUI : MonoBehaviour
     }
 
     public void OnStartTimerButton()
-{
-    if (chest != null)
     {
-        Debug.Log($"StartTimerButton clicked for chest in slot {chest.slotIndex}");
-        ICommand command = new StartTimerCommand(chest);
-        command.Execute();
-        chestController.StartTimer(chest.slotIndex);
+        if (chest != null)
+        {
+            ICommand command = new StartTimerCommand(chest);
+            command.Execute();
+            chestController.StartTimer(chest.slotIndex);
+        }
     }
-    else
-    {
-        Debug.LogError("StartTimerButton clicked, but chest is null!");
-    }
-}
 
     public void OnUnlockWithGemsButton()
     {
         if (chest != null)
         {
             ICommand command = new UnlockWithGemsCommand(chest);
-            command.Execute();
+            CommandManager.Instance.ExecuteCommand(command);
+            chestController.UnlockWithGems(chest.slotIndex);
+            canUndo = true; 
         }
     }
 
@@ -99,6 +109,13 @@ public class ChestSlotUI : MonoBehaviour
         if (chest != null)
         {
             chestController.CollectRewards(chest.slotIndex);
+            canUndo = false; 
         }
+    }
+
+    public void OnUndoButton()
+    {
+        CommandManager.Instance.Undo();
+        canUndo = false; 
     }
 }

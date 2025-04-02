@@ -73,6 +73,7 @@ public class ChestSlotManager : MonoBehaviour
 
         if (slotIndex >= 0 && slotIndex < chestSlotUIs.Length)
         {
+            Debug.Log($"Adding chest to slot {slotIndex}");
             chestSlotUIs[slotIndex].SetChest(newChest);
         }
         else
@@ -80,7 +81,6 @@ public class ChestSlotManager : MonoBehaviour
             Debug.LogError($"Invalid slot index {slotIndex} for chestSlotUIs.");
         }
 
-        
         if (!TimerManager.Instance.CanStartTimer())
         {
             chestQueue.Enqueue(newChest);

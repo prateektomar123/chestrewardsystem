@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Common
   m_EditorClassIdentifier: 
   chestName: Common
-  timerInMinutes: 15
+  timerInMinutes: 1
   minCoins: 100
   maxCoins: 200
   minGems: 10

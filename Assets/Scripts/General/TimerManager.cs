@@ -21,6 +21,7 @@ public class TimerManager : MonoBehaviour
 
     public bool CanStartTimer()
     {
+        Debug.Log($"TimerManager: CanStartTimer? activeChest is {(activeChest == null ? "null" : "not null")}");
         return activeChest == null;
     }
 
@@ -28,10 +29,11 @@ public class TimerManager : MonoBehaviour
     {
         if (activeChest != null)
         {
-            Debug.LogWarning("A chest is already unlocking! Cannot start a new timer.");
+            Debug.LogWarning($"A chest is already unlocking in slot {activeChest.slotIndex}! Cannot start a new timer.");
             return;
         }
 
+        Debug.Log($"TimerManager: Starting timer for chest in slot {chest.slotIndex}");
         activeChest = chest;
     }
 
@@ -40,16 +42,15 @@ public class TimerManager : MonoBehaviour
         if (activeChest == chest)
         {
             activeChest = null;
-            
-            ChestSlotManager.Instance.RemoveChest(chest.slotIndex);
         }
     }
 
     void Update()
+{
+    if (activeChest != null)
     {
-        if (activeChest != null)
-        {
-            activeChest.Update();
-        }
+        Debug.Log($"TimerManager: Updating activeChest in slot {activeChest.slotIndex}");
+        activeChest.Update();
     }
+}
 }
